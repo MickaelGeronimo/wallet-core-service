@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.apex</groupId>
-	<artifactId>apex-wallet-backend</artifactId>
+	<artifactId>wallet-core-service</artifactId>
 	<version>1.0.0</version>
-	<name>apex-wallet-backend</name>
-	<description>ApexWallet - Enterprise Ledger and High-Concurrency Payments Platform</description>
+	<name>wallet-core-service</name>
+	<description>Digital Wallet Engine - Double-Entry Ledger, Risk Pipeline and Graceful Degradation</description>
 
 	<properties>
 		<java.version>17</java.version>

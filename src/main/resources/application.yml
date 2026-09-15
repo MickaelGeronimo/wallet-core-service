@@ -19,7 +19,7 @@ spring:
         web-allow-others: true
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
     hibernate:
       ddl-auto: create-drop
     show-sql: false

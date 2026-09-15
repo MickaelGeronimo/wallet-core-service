@@ -14,12 +14,11 @@ public class RootController {
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> index() {
         Map<String, Object> resp = new LinkedHashMap<>();
-        resp.put("system", "NEXA Core Platform — Banking Ledger Engine");
+        resp.put("system", "Digital Wallet Engine — Core Ledger & Payment Processing Service");
         resp.put("version", "1.0.0");
         resp.put("status", "UP");
         resp.put("timestamp", Instant.now().toString());
         resp.put("architecture", "Double-Entry Bookkeeping Ledger (ACID Compliant, Pessimistic Locking)");
-        resp.put("frontendUrl", "http://localhost:3000");
         resp.put("swaggerUi", "http://localhost:8080/swagger-ui/index.html");
         resp.put("h2Console", "http://localhost:8080/h2-console");
 
@@ -38,7 +37,7 @@ public class RootController {
     public ResponseEntity<Map<String, String>> health() {
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
-                "engine", "NEXA Double-Entry Ledger",
+                "engine", "Double-Entry Ledger Engine",
                 "concurrency", "PESSIMISTIC_WRITE"
         ));
     }
