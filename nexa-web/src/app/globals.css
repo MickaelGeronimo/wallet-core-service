@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 8 8 10;
+    --foreground: 244 244 246;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+    background-color: #08080a;
+    color: #f4f4f6;
+  }
+
+  body {
+    background-color: #08080a;
+    color: #f4f4f6;
+    overflow-x: hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    selection-background-color: #ffffff;
+    selection-color: #000000;
+  }
+
+  ::selection {
+    background: #f4f4f6;
+    color: #08080a;
+  }
+}
+
+/* Revolut Sky Theme */
+.bg-revolut-sky {
+  background: radial-gradient(circle at 75% 20%, #3b8ef9 0%, #1e71f5 45%, #155dd6 100%);
+}
+
+.phone-glass-frame {
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* Luxury Grain Overlay */
+.bg-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+/* Subtle Technical Grid */
+.bg-grid-tech {
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Editorial Monumental Text Gradient */
+.text-gradient-silver {
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.55) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fef3c7 0%, #e6b450 60%, #b45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glass Surface with Subtle Rim */
+.nexa-glass {
+  background: rgba(13, 13, 18, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nexa-glass-bright {
+  background: rgba(20, 20, 28, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Hide scrollbars for clean aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08080a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
