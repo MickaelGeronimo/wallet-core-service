@@ -146,7 +146,6 @@ Durante picos extremos de acessos (ex: datas comemorativas, congestionamento de 
 
 ### 1. Executando o Serviço
 ```bash
-cd nexa-core-backend
 mvn spring-boot:run
 ```
 - API Base: `http://localhost:8080`
@@ -187,7 +186,6 @@ docker compose up -d
 A suíte de testes valida a integridade contábil, concorrência, regras de risco e degradação graciosa:
 
 ```bash
-cd nexa-core-backend
 mvn test
 ```
 
