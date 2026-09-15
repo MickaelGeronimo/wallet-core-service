@@ -1,29 +1,29 @@
 version: '3.8'
 
 services:
-  # 1. PostgreSQL 16 Enterprise Banking DB
+  # 1. PostgreSQL 16 Database
   postgres:
     image: postgres:16-alpine
-    container_name: nexa-postgres
+    container_name: wallet-postgres
     restart: always
     environment:
-      POSTGRES_DB: nexawallet
-      POSTGRES_USER: nexa_admin
-      POSTGRES_PASSWORD: nexa_secure_password_2026
+      POSTGRES_DB: walletdb
+      POSTGRES_USER: wallet_user
+      POSTGRES_PASSWORD: wallet_password_2026
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexa_admin -d nexawallet"]
+      test: ["CMD-SHELL", "pg_isready -U wallet_user -d walletdb"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # 2. Redis 7 High-Throughput Cache & Rate Limiter
+  # 2. Redis 7 Cache & Rate Limiting
   redis:
     image: redis:7-alpine
-    container_name: nexa-redis
+    container_name: wallet-redis
     restart: always
     ports:
       - "6379:6379"
@@ -36,10 +36,10 @@ services:
       timeout: 3s
       retries: 5
 
-  # 3. Apache Kafka (KRaft mode - Zero Zookeeper dependency)
+  # 3. Apache Kafka (KRaft mode)
   kafka:
     image: bashj79/kafka-kraft:latest
-    container_name: nexa-kafka
+    container_name: wallet-kafka
     restart: always
     ports:
       - "9092:9092"
@@ -59,29 +59,29 @@ services:
   # 4. PgAdmin Database Management Web UI
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: nexa-pgadmin
+    container_name: wallet-pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@nexa.com
+      PGADMIN_DEFAULT_EMAIL: admin@wallet.local
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
     depends_on:
       - postgres
 
-  # 5. NEXA Core Backend (Spring Boot 3.3.4 / Java 17 LTS)
-  nexa-backend:
+  # 5. Digital Wallet Backend (Spring Boot 3.3.4 / Java 17 LTS)
+  wallet-backend:
     build:
       context: ./nexa-core-backend
       dockerfile: Dockerfile
-    container_name: nexa-backend
+    container_name: wallet-backend
     restart: on-failure
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexawallet
-      SPRING_DATASOURCE_USERNAME: nexa_admin
-      SPRING_DATASOURCE_PASSWORD: nexa_secure_password_2026
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/walletdb
+      SPRING_DATASOURCE_USERNAME: wallet_user
+      SPRING_DATASOURCE_PASSWORD: wallet_password_2026
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       postgres:

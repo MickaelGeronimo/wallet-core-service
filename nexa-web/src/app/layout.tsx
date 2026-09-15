@@ -16,9 +16,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEXA — Experiência Financeira Sem Fricção",
+  title: "Digital Wallet — Core Banking & Payment System",
   description:
-    "A fusão definitiva entre precisão de engenharia contábil em Double-Entry e uma interface tridimensional desenhada para o capital do futuro.",
+    "Sistema de carteira digital e processamento de pagamentos com livro-razão contábil e alta resiliência.",
 };
 
 export default function RootLayout({

@@ -84,7 +84,7 @@ export default function PaymentExperience() {
                     <CreditCard className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-white">NEXA Pay Direct</h4>
+                    <h4 className="text-sm font-semibold text-white">Wallet Pay Direct</h4>
                     <span className="text-[11px] font-mono text-white/40">Protocolo v2.4</span>
                   </div>
                 </div>

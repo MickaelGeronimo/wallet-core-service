@@ -55,7 +55,7 @@ export default function Technology() {
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06] text-white/40">
             <div className="flex items-center gap-2">
               <Terminal className="w-4 h-4 text-emerald-400" />
-              <span>NexaLedgerService.java (Double-Entry Engine)</span>
+              <span>TransferService.java (Double-Entry Engine)</span>
             </div>
             <div className="text-[10px]">SPRING BOOT 3.3.4 • JAVA 17</div>
           </div>
@@ -63,8 +63,8 @@ export default function Technology() {
           <pre className="text-white/80 leading-relaxed overflow-x-auto">
             <code>
 {`@Service
-@Transactional(isolation = Isolation.SERIALIZABLE)
-public class NexaLedgerService {
+@Transactional(isolation = Isolation.READ_COMMITTED)
+public class TransferService {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public TransactionReceipt executeTransfer(TransferRequest req) {

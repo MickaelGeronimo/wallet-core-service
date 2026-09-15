@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: nexa-core-backend
+    name: wallet-core-service
 
   datasource:
     url: jdbc:h2:mem:apexwallet;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL

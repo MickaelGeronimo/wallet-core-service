@@ -59,11 +59,11 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   return (
     <aside
       ref={containerRef}
-      aria-label="Carregando experiência NEXA"
+      aria-label="Carregando aplicação"
       className="fixed inset-0 z-50 flex flex-col justify-between bg-[#050507] p-8 md:p-14 text-[#f4f4f6] select-none"
     >
       <header className="flex justify-between items-center text-xs tracking-widest uppercase text-white/40">
-        <span>NEXA CORE PLATFORM</span>
+        <span>WALLET CORE</span>
         <span className="flex items-center gap-2">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           LEDGER INITIALIZING

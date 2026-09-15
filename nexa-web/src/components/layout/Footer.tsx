@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="relative bg-[#050507] border-t border-white/[0.08] pt-24 pb-16 overflow-hidden">
       {/* Background Watermark */}
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-[0.03] text-[28vw] font-black tracking-tighter leading-none text-white whitespace-nowrap">
-        NEXA
+        WALLET
       </div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
@@ -16,17 +16,17 @@ export default function Footer() {
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center font-mono font-bold text-sm text-white">
-                N
+                W
               </div>
               <span className="font-mono text-sm tracking-widest font-semibold uppercase text-white">
-                NEXA
+                WALLET CORE
               </span>
             </div>
             <p className="text-xs text-white/50 leading-relaxed max-w-xs">
-              Infraestrutura de ponta para movimentação financeira global. Double-entry ledger auditável em tempo real.
+              Infraestrutura para movimentação financeira digital com double-entry ledger auditável em tempo real.
             </p>
             <div className="pt-2 text-[11px] font-mono text-white/30">
-              © {new Date().getFullYear()} NEXA Core Technologies.
+              © {new Date().getFullYear()} Digital Wallet Engine.
             </div>
           </div>
 
@@ -46,7 +46,7 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-mono tracking-widest uppercase text-white/40">Soluções</h4>
             <ul className="space-y-2 text-xs text-white/60">
-              <li>NEXA Obsidian Card</li>
+              <li>Metal Debit Card</li>
               <li>Instant Foreign Exchange</li>
               <li>Yield Automático</li>
               <li>API de Liquidação Direta</li>
