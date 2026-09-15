@@ -134,7 +134,6 @@ Durante picos extremos de acessos (ex: datas comemorativas, congestionamento de 
 | **Segurança** | Autenticação Stateless via JWT (JJWT 0.12.6) |
 | **Banco de Dados** | H2 (Memória para desenvolvimento/testes) / PostgreSQL 16 (Produção) |
 | **Mensageria & Cache** | Apache Kafka (KRaft mode) e Redis 7 |
-| **Frontend** | Next.js 14, React 18, Tailwind CSS, Three.js, GSAP |
 
 ---
 
@@ -143,10 +142,9 @@ Durante picos extremos de acessos (ex: datas comemorativas, congestionamento de 
 ### Pré-requisitos
 - **JDK 17 LTS**
 - **Maven 3.9+**
-- **Node.js 18+** (para o frontend)
-- **Docker & Docker Compose** (opcional, para ambiente completo)
+- **Docker & Docker Compose** (opcional, para ambiente de containers)
 
-### 1. Executando o Backend
+### 1. Executando o Serviço
 ```bash
 cd nexa-core-backend
 mvn spring-boot:run
@@ -156,15 +154,7 @@ mvn spring-boot:run
 - Console H2: `http://localhost:8080/h2-console`
 - Actuator Health: `http://localhost:8080/actuator/health`
 
-### 2. Executando o Frontend
-```bash
-cd nexa-web
-npm install
-npm run dev
-```
-- Interface Web: `http://localhost:3000`
-
-### 3. Executando via Docker Compose
+### 2. Executando via Docker Compose
 ```bash
 docker compose up -d
 ```
