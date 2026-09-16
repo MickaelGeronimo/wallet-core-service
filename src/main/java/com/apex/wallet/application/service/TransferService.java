@@ -92,10 +92,14 @@ public class TransferService {
         // Apply chaos delay or forced failure if active (for simulation)
         chaosManager.applyChaosIfActive();
 
+        final String effectiveKey = (idempotencyKey != null && !idempotencyKey.isBlank())
+                ? idempotencyKey.trim()
+                : "PIX-" + java.util.UUID.randomUUID();
+
         // 1. Idempotency Check: Return existing transaction if key already exists
-        Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(idempotencyKey);
+        Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(effectiveKey);
         if (existingTx.isPresent()) {
-            log.info("Chave de idempotência já processada: {}. Retornando transação existente.", idempotencyKey);
+            log.info("Chave de idempotência já processada: {}. Retornando transação existente.", effectiveKey);
             return existingTx.get();
         }
 
@@ -165,7 +169,7 @@ public class TransferService {
 
         // 7. Create Transaction record
         Transaction transaction = new Transaction(
-                idempotencyKey,
+                effectiveKey,
                 sourceAccountId,
                 targetAccountId,
                 amount,
@@ -266,7 +270,11 @@ public class TransferService {
         }
         amount = amount.setScale(2, RoundingMode.HALF_EVEN);
 
-        Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(idempotencyKey);
+        final String effectiveKey = (idempotencyKey != null && !idempotencyKey.isBlank())
+                ? idempotencyKey.trim()
+                : "DEP-" + java.util.UUID.randomUUID();
+
+        Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(effectiveKey);
         if (existingTx.isPresent()) {
             return existingTx.get();
         }
@@ -282,7 +290,7 @@ public class TransferService {
         balanceCacheService.updateBalance(accountId, newBalance);
 
         Transaction transaction = new Transaction(
-                idempotencyKey,
+                effectiveKey,
                 null,
                 accountId,
                 amount,

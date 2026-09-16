@@ -46,6 +46,15 @@ class ApexWalletApplicationTests {
     @Autowired(required = false)
     private io.swagger.v3.oas.models.OpenAPI openAPI;
 
+    @Autowired
+    private com.apex.wallet.application.service.AuthService authService;
+
+    @Autowired
+    private com.apex.wallet.application.service.LedgerAuditService ledgerAuditService;
+
+    @Autowired
+    private com.apex.wallet.api.controller.AuditController auditController;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         chaosManager.reset();
@@ -268,5 +277,60 @@ class ApexWalletApplicationTests {
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(429, response.getBody().get("status"));
         Assertions.assertTrue(response.getBody().get("message").toString().contains("Taxa máxima de requisições excedida"));
+    }
+
+    @Test
+    @DisplayName("Security & OWASP A07: Bad credentials must throw BadCredentialsException and map to HTTP 401 without user enumeration")
+    void testBadCredentialsReturnsUnauthorized() {
+        // 1. Test non-existent email
+        var exNotFound = Assertions.assertThrows(
+                org.springframework.security.authentication.BadCredentialsException.class,
+                () -> authService.authenticate("naoexiste@wallet.local", "qualquersenha")
+        );
+
+        // 2. Test existing user with wrong password
+        var exWrongPass = Assertions.assertThrows(
+                org.springframework.security.authentication.BadCredentialsException.class,
+                () -> authService.authenticate("lucas@wallet.local", "senhaincorreta")
+        );
+
+        // 3. Messages must be identical to prevent user enumeration
+        Assertions.assertEquals(exNotFound.getMessage(), exWrongPass.getMessage(), "Error message must be identical for non-existent and wrong-password accounts to prevent user enumeration");
+
+        // 4. Exception handler must translate to HTTP 401 Unauthorized
+        var handler = new com.apex.wallet.api.exception.GlobalExceptionHandler();
+        var response = handler.handleBadCredentials(exNotFound);
+        Assertions.assertEquals(org.springframework.http.HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        Assertions.assertEquals(401, response.getBody().get("status"));
+    }
+
+    @Test
+    @DisplayName("Ledger Reconciliation: Perform mathematical audit asserting sum(Balances) == TotalCredits - TotalDebits with zero discrepancy")
+    void testLedgerMathematicalIntegrityReconciliation() {
+        var audit = ledgerAuditService.performAudit();
+
+        Assertions.assertNotNull(audit);
+        Assertions.assertEquals("VERIFIED_SOUND", audit.get("ledgerIntegrityStatus"), "Ledger must be mathematically sound");
+        Assertions.assertEquals(0, ((BigDecimal) audit.get("discrepancy")).compareTo(BigDecimal.ZERO), "Discrepancy must be 0.00");
+
+        BigDecimal netLedgerEquity = (BigDecimal) audit.get("netLedgerEquity");
+        BigDecimal totalAccountBalances = (BigDecimal) audit.get("totalAccountBalances");
+        Assertions.assertEquals(netLedgerEquity, totalAccountBalances, "Net ledger equity must exactly equal total account balances");
+    }
+
+    @Test
+    @DisplayName("Outbox Observability: Audit controller endpoints must expose Outbox events and statuses")
+    void testOutboxAuditControllerEndpoints() {
+        var allEvents = auditController.getAllOutboxEvents();
+        Assertions.assertEquals(org.springframework.http.HttpStatus.OK, allEvents.getStatusCode());
+        Assertions.assertNotNull(allEvents.getBody());
+
+        var pendingEvents = auditController.getPendingOutboxEvents();
+        Assertions.assertEquals(org.springframework.http.HttpStatus.OK, pendingEvents.getStatusCode());
+        Assertions.assertNotNull(pendingEvents.getBody());
+
+        var deadLetterEvents = auditController.getDeadLetterOutboxEvents();
+        Assertions.assertEquals(org.springframework.http.HttpStatus.OK, deadLetterEvents.getStatusCode());
+        Assertions.assertNotNull(deadLetterEvents.getBody());
     }
 }

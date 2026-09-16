@@ -1,5 +1,6 @@
 package com.apex.wallet.api.dto;
 
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ public class DepositRequest {
 
     @NotNull(message = "O valor é obrigatório")
     @DecimalMin(value = "1.00", message = "O valor mínimo de depósito é R$ 1,00")
+    @DecimalMax(value = "1000000.00", message = "O valor máximo de depósito é R$ 1.000.000,00")
     @Digits(integer = 15, fraction = 2, message = "O valor deve ter no máximo 2 casas decimais")
     private BigDecimal amount;
 

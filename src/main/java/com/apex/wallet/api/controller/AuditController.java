@@ -3,6 +3,9 @@ package com.apex.wallet.api.controller;
 import com.apex.wallet.application.service.LedgerAuditService;
 import com.apex.wallet.domain.model.LedgerEntry;
 import com.apex.wallet.domain.model.Transaction;
+import com.apex.wallet.domain.outbox.OutboxEvent;
+import com.apex.wallet.domain.outbox.OutboxStatus;
+import com.apex.wallet.infrastructure.outbox.OutboxEventRepository;
 import com.apex.wallet.infrastructure.repository.TransactionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +21,14 @@ public class AuditController {
 
     private final LedgerAuditService ledgerAuditService;
     private final TransactionRepository transactionRepository;
+    private final OutboxEventRepository outboxEventRepository;
 
-    public AuditController(LedgerAuditService ledgerAuditService, TransactionRepository transactionRepository) {
+    public AuditController(LedgerAuditService ledgerAuditService,
+                           TransactionRepository transactionRepository,
+                           OutboxEventRepository outboxEventRepository) {
         this.ledgerAuditService = ledgerAuditService;
         this.transactionRepository = transactionRepository;
+        this.outboxEventRepository = outboxEventRepository;
     }
 
     @GetMapping({"/summary", "/balance"})
@@ -37,5 +44,20 @@ public class AuditController {
     @GetMapping("/all-transactions")
     public ResponseEntity<List<Transaction>> getAllTransactions() {
         return ResponseEntity.ok(transactionRepository.findAllByOrderByCreatedAtDesc());
+    }
+
+    @GetMapping("/outbox")
+    public ResponseEntity<List<OutboxEvent>> getAllOutboxEvents() {
+        return ResponseEntity.ok(outboxEventRepository.findAll());
+    }
+
+    @GetMapping("/outbox/pending")
+    public ResponseEntity<List<OutboxEvent>> getPendingOutboxEvents() {
+        return ResponseEntity.ok(outboxEventRepository.findByStatus(OutboxStatus.PENDING));
+    }
+
+    @GetMapping("/outbox/dead-letter")
+    public ResponseEntity<List<OutboxEvent>> getDeadLetterOutboxEvents() {
+        return ResponseEntity.ok(outboxEventRepository.findByStatus(OutboxStatus.DEAD_LETTER));
     }
 }

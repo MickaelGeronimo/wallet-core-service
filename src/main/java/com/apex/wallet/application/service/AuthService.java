@@ -25,11 +25,10 @@ public class AuthService {
     }
 
     public Map<String, Object> authenticate(String email, String rawPassword) {
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas. Conta não encontrada."));
+        Account account = accountRepository.findByEmail(email).orElse(null);
 
-        if (!passwordEncoder.matches(rawPassword, account.getPassword())) {
-            throw new IllegalArgumentException("Credenciais inválidas. Senha incorreta.");
+        if (account == null || !passwordEncoder.matches(rawPassword, account.getPassword())) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Credenciais inválidas. Verifique seu e-mail e senha.");
         }
 
         String token = jwtService.generateToken(account.getEmail(), account.getId(), account.getHolderName(), account.getRole());

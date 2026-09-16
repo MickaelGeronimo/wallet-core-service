@@ -1,5 +1,6 @@
 package com.apex.wallet.api.dto;
 
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ public class TransferRequest {
 
     @NotNull(message = "O valor é obrigatório")
     @DecimalMin(value = "0.01", message = "O valor mínimo de transferência é R$ 0,01")
+    @DecimalMax(value = "1000000.00", message = "O valor máximo de transferência é R$ 1.000.000,00")
     @Digits(integer = 15, fraction = 2, message = "O valor deve ter no máximo 2 casas decimais")
     private BigDecimal amount;
 

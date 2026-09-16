@@ -55,6 +55,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, "Conflito de integridade contábil: chave de idempotência duplicada ou violação de unicidade.");
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(org.springframework.security.authentication.BadCredentialsException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
     @ExceptionHandler(io.github.resilience4j.ratelimiter.RequestNotPermitted.class)
     public ResponseEntity<Map<String, Object>> handleRateLimiter(io.github.resilience4j.ratelimiter.RequestNotPermitted ex) {
         return buildErrorResponse(HttpStatus.TOO_MANY_REQUESTS, "Taxa máxima de requisições excedida. Tente novamente em instantes.");

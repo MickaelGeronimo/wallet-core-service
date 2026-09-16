@@ -1,5 +1,6 @@
 package com.apex.wallet.infrastructure.outbox;
 
+import com.apex.wallet.application.resilience.ChaosManager;
 import com.apex.wallet.domain.outbox.OutboxEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +17,20 @@ public class OutboxRelayWorker {
     private static final Logger log = LoggerFactory.getLogger(OutboxRelayWorker.class);
 
     private final OutboxEventRepository outboxRepo;
+    private final ChaosManager chaosManager;
 
-    public OutboxRelayWorker(OutboxEventRepository outboxRepo) {
+    public OutboxRelayWorker(OutboxEventRepository outboxRepo, ChaosManager chaosManager) {
         this.outboxRepo = outboxRepo;
+        this.chaosManager = chaosManager;
     }
 
     @Scheduled(fixedDelay = 2500)
     @Transactional
     public void processOutboxEvents() {
+        if (chaosManager.isForceFailure()) {
+            return;
+        }
+
         List<OutboxEvent> pending = outboxRepo.findPendingForDispatch(PageRequest.of(0, 20));
         if (pending.isEmpty()) {
             return;

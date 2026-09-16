@@ -34,4 +34,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.id = :id")
     Optional<Account> findByIdWithLock(@Param("id") Long id);
+
+    @Query("SELECT COALESCE(SUM(a.balance), 0) FROM Account a")
+    java.math.BigDecimal sumTotalBalances();
 }
