@@ -55,6 +55,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, "Conflito de integridade contábil: chave de idempotência duplicada ou violação de unicidade.");
     }
 
+    @ExceptionHandler(io.github.resilience4j.ratelimiter.RequestNotPermitted.class)
+    public ResponseEntity<Map<String, Object>> handleRateLimiter(io.github.resilience4j.ratelimiter.RequestNotPermitted ex) {
+        return buildErrorResponse(HttpStatus.TOO_MANY_REQUESTS, "Taxa máxima de requisições excedida. Tente novamente em instantes.");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno de processamento: " + ex.getMessage());

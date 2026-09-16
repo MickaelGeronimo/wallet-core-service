@@ -14,6 +14,7 @@ import com.apex.wallet.infrastructure.repository.AccountRepository;
 import com.apex.wallet.infrastructure.repository.LedgerEntryRepository;
 import com.apex.wallet.infrastructure.repository.TransactionRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
@@ -74,6 +75,7 @@ public class TransferService {
      * - Transactional Outbox event generation in the exact same ACID unit of work
      * - Resilience4j Circuit Breaker with Graceful Degradation Fallback
      */
+    @RateLimiter(name = "transferService")
     @CircuitBreaker(name = "transferService", fallbackMethod = "fallbackExecuteTransfer")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Transaction executeTransfer(String idempotencyKey, Long sourceAccountId, String targetPixKey, BigDecimal amount, String description) {

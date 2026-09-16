@@ -243,4 +243,30 @@ class ApexWalletApplicationTests {
         Assertions.assertNotNull(tx);
         Assertions.assertEquals(recipient.getId(), tx.getTargetAccountId(), "Must correctly resolve target account ID despite uppercase/whitespace Pix key");
     }
+
+    @Test
+    @DisplayName("Security & OWASP: Account entity password hash must NEVER leak into JSON serialization")
+    void testAccountPasswordExcludedFromJsonSerialization() throws Exception {
+        Account user = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        String json = mapper.writeValueAsString(user);
+
+        Assertions.assertFalse(json.contains("password"), "JSON output must NOT contain password field or hash");
+        Assertions.assertTrue(json.contains("lucas@wallet.local"));
+    }
+
+    @Test
+    @DisplayName("Exception Handling: RequestNotPermitted must be translated to HTTP 429 Too Many Requests")
+    void testRateLimiterExceptionHandler() {
+        var handler = new com.apex.wallet.api.exception.GlobalExceptionHandler();
+        var rateLimiter = io.github.resilience4j.ratelimiter.RateLimiter.ofDefaults("testLimiter");
+        var ex = io.github.resilience4j.ratelimiter.RequestNotPermitted.createRequestNotPermitted(rateLimiter);
+        var response = handler.handleRateLimiter(ex);
+
+        Assertions.assertEquals(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(429, response.getBody().get("status"));
+        Assertions.assertTrue(response.getBody().get("message").toString().contains("Taxa máxima de requisições excedida"));
+    }
 }
