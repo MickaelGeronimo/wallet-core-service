@@ -22,10 +22,17 @@ public class JwtService {
     private long jwtExpirationMs;
 
     public String generateToken(String email, Long accountId, String holderName, String role) {
+        return generateToken(email, accountId, holderName, role, null);
+    }
+
+    public String generateToken(String email, Long accountId, String holderName, String role, String pixKey) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("accountId", accountId);
         claims.put("holderName", holderName);
         claims.put("role", role);
+        if (pixKey != null) {
+            claims.put("pixKey", pixKey);
+        }
 
         return Jwts.builder()
                 .claims(claims)
@@ -47,6 +54,10 @@ public class JwtService {
             return ((Number) accountId).longValue();
         }
         return null;
+    }
+
+    public String extractPixKey(String token) {
+        return extractClaim(token, c -> (String) c.get("pixKey"));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

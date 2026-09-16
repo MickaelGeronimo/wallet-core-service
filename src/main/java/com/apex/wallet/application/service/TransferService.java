@@ -124,7 +124,7 @@ public class TransferService {
                 recentTxCount,
                 BigDecimal.ZERO
         );
-        riskAssessmentService.assessTransaction(riskContext);
+        com.apex.wallet.domain.risk.RiskAssessmentResult riskResult = riskAssessmentService.assessTransaction(riskContext);
 
         // 3. Resolve target account by Pix key (case-insensitive & trimmed)
         Account targetAccountMeta = accountRepository.findByPixKeyIgnoreCase(normalizedPixKey)
@@ -204,9 +204,10 @@ public class TransferService {
         ledgerEntryRepository.save(creditEntry);
 
         // 9. Transactional Outbox Pattern
+        boolean amlFlagged = riskResult.decision() == com.apex.wallet.domain.risk.RiskDecision.FLAGGED_REVIEW;
         String outboxPayload = String.format(
-                "{\"txId\":%d,\"amount\":\"%s\",\"debtor\":\"%s\",\"creditor\":\"%s\",\"type\":\"PIX_TRANSFER\"}",
-                savedTx.getId(), amount.toPlainString(), sourceAccount.getHolderName(), targetAccount.getHolderName()
+                "{\"txId\":%d,\"amount\":\"%s\",\"debtor\":\"%s\",\"creditor\":\"%s\",\"type\":\"PIX_TRANSFER\",\"amlFlagged\":%b}",
+                savedTx.getId(), amount.toPlainString(), sourceAccount.getHolderName(), targetAccount.getHolderName(), amlFlagged
         );
         OutboxEvent outboxEvent = new OutboxEvent("TRANSFER", savedTx.getId().toString(), "PAYMENT_SETTLED", outboxPayload);
         outboxEventRepository.save(outboxEvent);

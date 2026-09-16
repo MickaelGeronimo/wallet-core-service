@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "ledger_entries", indexes = {
     @Index(name = "idx_ledger_account", columnList = "account_id"),
-    @Index(name = "idx_ledger_transaction", columnList = "transaction_id")
+    @Index(name = "idx_ledger_transaction", columnList = "transaction_id"),
+    @Index(name = "idx_ledger_account_created", columnList = "account_id, created_at"),
+    @Index(name = "idx_ledger_type_amount", columnList = "entry_type, amount")
 })
 public class LedgerEntry {
 

@@ -61,6 +61,9 @@ class ApexWalletApplicationTests {
     @Autowired
     private com.apex.wallet.api.controller.ChaosSimulationController chaosController;
 
+    @Autowired
+    private com.apex.wallet.infrastructure.security.JwtService jwtService;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         chaosManager.reset();
@@ -446,5 +449,53 @@ class ApexWalletApplicationTests {
         Assertions.assertEquals(org.springframework.http.HttpStatus.OK, replayRes.getStatusCode());
         Assertions.assertEquals(0, queueService.getDeadLetterQueueSize(), "DLQ must be empty after replay");
         Assertions.assertTrue(queueService.hasPending(), "Buffer queue must receive the replayed item");
+    }
+
+    @Test
+    @DisplayName("Antifraud & AML: High value transfer (R$ 35.000) generates an Outbox event marked with amlFlagged:true")
+    void testAmlFlaggedTransactionRecordedInOutboxPayload() {
+        Account admin = accountRepository.findByEmail("admin@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+
+        BigDecimal amount = new BigDecimal("35000.00");
+        String idemKey = "AML-OUTBOX-" + UUID.randomUUID();
+
+        Transaction tx = transferService.executeTransfer(
+                idemKey,
+                admin.getId(),
+                recipient.getPixKey(),
+                amount,
+                "Transferência de alto valor para verificação AML"
+        );
+
+        Assertions.assertNotNull(tx);
+        Assertions.assertEquals(com.apex.wallet.domain.model.TransactionStatus.COMPLETED, tx.getStatus());
+
+        var outboxEvents = outboxEventRepository.findAll();
+        var txOutboxEvent = outboxEvents.stream()
+                .filter(e -> tx.getId().toString().equals(e.getAggregateId()))
+                .findFirst();
+
+        Assertions.assertTrue(txOutboxEvent.isPresent(), "Outbox event must exist for the transaction");
+        Assertions.assertTrue(txOutboxEvent.get().getPayload().contains("\"amlFlagged\":true"), "Outbox payload must contain amlFlagged: true");
+        Assertions.assertTrue(txOutboxEvent.get().getPayload().contains("\"type\":\"PIX_TRANSFER\""), "Outbox payload must indicate PIX_TRANSFER");
+    }
+
+    @Test
+    @DisplayName("Security & Identity: JWT encodes and securely extracts pixKey claim for degraded mode offline recovery")
+    void testJwtTokenEncodesAndExtractsPixKey() {
+        String email = "carlos@wallet.local";
+        Long accountId = 3L;
+        String holderName = "Carlos Eduardo";
+        String role = "ROLE_USER";
+        String pixKey = "carlos@pix.com";
+
+        String token = jwtService.generateToken(email, accountId, holderName, role, pixKey);
+        Assertions.assertNotNull(token);
+
+        Assertions.assertEquals(email, jwtService.extractEmail(token));
+        Assertions.assertEquals(accountId, jwtService.extractAccountId(token));
+        Assertions.assertEquals(pixKey, jwtService.extractPixKey(token));
+        Assertions.assertTrue(jwtService.isTokenValid(token, email));
     }
 }

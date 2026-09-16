@@ -30,6 +30,10 @@ public class RiskAssessmentService {
         log.info("Iniciando avaliação de risco Antifraude/AML para conta={} valor={}",
                 context.senderAccount().getAccountNumber(), context.amount());
 
+        boolean flagged = false;
+        String flagReason = null;
+        String flagRule = null;
+
         for (RiskRule rule : rules) {
             RiskAssessmentResult result = rule.evaluate(context);
             if (result.decision() == RiskDecision.REJECTED) {
@@ -38,8 +42,15 @@ public class RiskAssessmentService {
                 throw new RiskRejectedException(result);
             }
             if (result.decision() == RiskDecision.FLAGGED_REVIEW) {
-                log.info("Transação SINALIZADA para auditoria pela regra [{}]", rule.getRuleName());
+                log.info("Transação SINALIZADA para auditoria pela regra [{}]: {}", rule.getRuleName(), result.reason());
+                flagged = true;
+                flagReason = result.reason();
+                flagRule = rule.getRuleName();
             }
+        }
+
+        if (flagged) {
+            return new RiskAssessmentResult(RiskDecision.FLAGGED_REVIEW, flagReason, flagRule, 0.4, Instant.now());
         }
 
         log.info("Transação APROVADA em todas as regras de risco.");

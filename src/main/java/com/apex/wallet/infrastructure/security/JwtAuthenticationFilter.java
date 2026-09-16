@@ -53,12 +53,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Long accountId = jwtService.extractAccountId(jwt);
                     String holderName = jwtService.extractClaim(jwt, c -> (String) c.get("holderName"));
                     String role = jwtService.extractClaim(jwt, c -> (String) c.get("role"));
+                    String pixKey = jwtService.extractPixKey(jwt);
                     if (accountId != null && role != null) {
                         account = new Account();
                         account.setId(accountId);
                         account.setEmail(userEmail);
                         account.setHolderName(holderName != null ? holderName : "Usuario");
                         account.setRole(role);
+                        account.setPixKey(pixKey);
                     }
                 }
 

@@ -31,7 +31,7 @@ public class AuthService {
             throw new org.springframework.security.authentication.BadCredentialsException("Credenciais inválidas. Verifique seu e-mail e senha.");
         }
 
-        String token = jwtService.generateToken(account.getEmail(), account.getId(), account.getHolderName(), account.getRole());
+        String token = jwtService.generateToken(account.getEmail(), account.getId(), account.getHolderName(), account.getRole(), account.getPixKey());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);

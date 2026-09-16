@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 @Table(name = "transactions", indexes = {
     @Index(name = "idx_tx_idempotency", columnList = "idempotency_key", unique = true),
     @Index(name = "idx_tx_source_account", columnList = "source_account_id"),
-    @Index(name = "idx_tx_target_account", columnList = "target_account_id")
+    @Index(name = "idx_tx_target_account", columnList = "target_account_id"),
+    @Index(name = "idx_tx_source_created", columnList = "source_account_id, created_at"),
+    @Index(name = "idx_tx_target_created", columnList = "target_account_id, created_at")
 })
 public class Transaction {
 
