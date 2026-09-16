@@ -202,4 +202,17 @@ class ApexWalletApplicationTests {
         Assertions.assertEquals("SANCTIONS_AND_BLACKLIST_RULE", response.getBody().get("rule"));
         Assertions.assertEquals("Chave destinatária consta na lista restritiva", response.getBody().get("reason"));
     }
+
+    @Test
+    @DisplayName("Exception Handling: DataIntegrityViolationException must be translated to HTTP 409 Conflict")
+    void testDataIntegrityViolationExceptionHandler() {
+        var handler = new com.apex.wallet.api.exception.GlobalExceptionHandler();
+        var ex = new org.springframework.dao.DataIntegrityViolationException("Unique constraint violation: idx_tx_idempotency");
+        var response = handler.handleDataIntegrityViolation(ex);
+
+        Assertions.assertEquals(org.springframework.http.HttpStatus.CONFLICT, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(409, response.getBody().get("status"));
+        Assertions.assertTrue(response.getBody().get("message").toString().contains("chave de idempotência duplicada"));
+    }
 }

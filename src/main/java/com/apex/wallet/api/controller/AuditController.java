@@ -29,7 +29,7 @@ public class AuditController {
         return ResponseEntity.ok(ledgerAuditService.performAudit());
     }
 
-    @GetMapping("/ledger-entries")
+    @GetMapping({"/ledger-entries", "/entries"})
     public ResponseEntity<List<LedgerEntry>> getAllLedgerEntries() {
         return ResponseEntity.ok(ledgerAuditService.getAllEntries());
     }

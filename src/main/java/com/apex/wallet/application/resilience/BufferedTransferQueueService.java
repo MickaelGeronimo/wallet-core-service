@@ -20,9 +20,14 @@ public class BufferedTransferQueueService {
 
     private static final Logger log = LoggerFactory.getLogger(BufferedTransferQueueService.class);
 
+    public static final int MAX_BUFFER_CAPACITY = 25_000;
+
     private final Queue<QueuedTransferItem> bufferQueue = new ConcurrentLinkedQueue<>();
 
     public void enqueue(QueuedTransferItem item) {
+        if (bufferQueue.size() >= MAX_BUFFER_CAPACITY) {
+            throw new IllegalStateException("Capacidade máxima do buffer de contingência atingida. Tente novamente em instantes.");
+        }
         bufferQueue.offer(item);
         log.warn("DEGRAÇÃO GRACIOSA ATIVADA: Transferência {} enfileirada no buffer assíncrono. Tamanho atual da fila: {}",
                 item.idempotencyKey(), bufferQueue.size());

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -84,6 +85,7 @@ public class TransferService {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor da transferência deve ser positivo.");
         }
+        amount = amount.setScale(2, RoundingMode.HALF_EVEN);
 
         // Apply chaos delay or forced failure if active (for simulation)
         chaosManager.applyChaosIfActive();
@@ -258,6 +260,7 @@ public class TransferService {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor do depósito deve ser positivo.");
         }
+        amount = amount.setScale(2, RoundingMode.HALF_EVEN);
 
         Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(idempotencyKey);
         if (existingTx.isPresent()) {
