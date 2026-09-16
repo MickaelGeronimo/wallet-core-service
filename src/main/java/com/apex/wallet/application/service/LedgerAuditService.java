@@ -56,7 +56,17 @@ public class LedgerAuditService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<LedgerEntry> getEntriesByAccount(Long accountId, org.springframework.data.domain.Pageable pageable) {
+        return ledgerEntryRepository.findByAccountIdOrderByCreatedAtDesc(accountId, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public List<LedgerEntry> getAllEntries() {
         return ledgerEntryRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<LedgerEntry> getAllEntries(org.springframework.data.domain.Pageable pageable) {
+        return ledgerEntryRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 }

@@ -108,6 +108,9 @@ public class TransferService {
                 .orElseThrow(() -> new IllegalArgumentException("Conta de origem não encontrada: " + sourceAccountId));
 
         String normalizedPixKey = targetPixKey != null ? targetPixKey.trim() : "";
+        if (normalizedPixKey.isBlank()) {
+            throw new IllegalArgumentException("A chave PIX do destinatário é obrigatória.");
+        }
 
         long recentTxCount = transactionRepository.countBySourceAccountIdAndCreatedAtAfter(
                 sourceAccountId, LocalDateTime.now().minus(60, ChronoUnit.SECONDS)

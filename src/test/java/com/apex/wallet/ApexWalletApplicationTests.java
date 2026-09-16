@@ -29,6 +29,9 @@ class ApexWalletApplicationTests {
     private AccountRepository accountRepository;
 
     @Autowired
+    private com.apex.wallet.infrastructure.repository.TransactionRepository transactionRepository;
+
+    @Autowired
     private OutboxEventRepository outboxEventRepository;
 
     @Autowired
@@ -332,5 +335,64 @@ class ApexWalletApplicationTests {
         var deadLetterEvents = auditController.getDeadLetterOutboxEvents();
         Assertions.assertEquals(org.springframework.http.HttpStatus.OK, deadLetterEvents.getStatusCode());
         Assertions.assertNotNull(deadLetterEvents.getBody());
+    }
+
+    @Test
+    @DisplayName("Antifraud & AML: Bidirectional screening must immediately block transfer initiated by a sanctioned sender account")
+    void testBidirectionalSanctionsBlocksSanctionedSender() {
+        Account sanctionedSender = new Account("SANCT-101", "Sanctioned Person", "blocked@fraud.com", "pass", "sanct@pix.com", BigDecimal.ZERO, "ROLE_USER");
+        Account savedSender = accountRepository.save(sanctionedSender);
+        try {
+            Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
+
+            RiskRejectedException ex = Assertions.assertThrows(
+                    RiskRejectedException.class,
+                    () -> transferService.executeTransfer(
+                            "SANCTION-SENDER-" + UUID.randomUUID(),
+                            savedSender.getId(),
+                            recipient.getPixKey(),
+                            new BigDecimal("50.00"),
+                            "Tentativa de evasão de sanções por remetente bloqueado"
+                    )
+            );
+
+            Assertions.assertTrue(ex.getMessage().contains("SANCTIONS_AND_BLACKLIST_RULE"));
+            Assertions.assertTrue(ex.getMessage().contains("Conta de origem"));
+        } finally {
+            accountRepository.delete(savedSender);
+        }
+    }
+
+    @Test
+    @DisplayName("Fail-Fast Validation: Blank or whitespace target Pix key must fail immediately before row locking")
+    void testTransferWithBlankPixKeyFailsFast() {
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> transferService.executeTransfer(
+                        "BLANK-PIX-" + UUID.randomUUID(),
+                        sender.getId(),
+                        "   ",
+                        new BigDecimal("10.00"),
+                        "Chave em branco"
+                )
+        );
+
+        Assertions.assertTrue(ex.getMessage().contains("A chave PIX do destinatário é obrigatória"));
+    }
+
+    @Test
+    @DisplayName("Performance & Pagination: Bounded history queries must return controlled page slices without memory exhaustion")
+    void testPaginatedTransactionAndLedgerHistory() {
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+
+        var pagedTx = transactionRepository.findByAccountId(sender.getId(), org.springframework.data.domain.PageRequest.of(0, 2));
+        Assertions.assertNotNull(pagedTx);
+        Assertions.assertTrue(pagedTx.getNumberOfElements() <= 2);
+
+        var pagedLedger = ledgerAuditService.getEntriesByAccount(sender.getId(), org.springframework.data.domain.PageRequest.of(0, 2));
+        Assertions.assertNotNull(pagedLedger);
+        Assertions.assertTrue(pagedLedger.getNumberOfElements() <= 2);
     }
 }

@@ -29,6 +29,21 @@ public class SanctionsCheckRule implements RiskRule {
 
     @Override
     public RiskAssessmentResult evaluate(RiskContext context) {
+        // 1. Debtor / Sender Sanctions Screening
+        if (context.senderAccount() != null) {
+            String senderEmail = context.senderAccount().getEmail();
+            String senderPix = context.senderAccount().getPixKey();
+            if ((senderEmail != null && SANCTIONED_KEYS.contains(senderEmail.toLowerCase())) ||
+                (senderPix != null && SANCTIONED_KEYS.contains(senderPix.toLowerCase()))) {
+                return RiskAssessmentResult.rejected(
+                        getRuleName(),
+                        "Conta de origem consta na lista restritiva de sanções e bloqueios cautelares.",
+                        1.0
+                );
+            }
+        }
+
+        // 2. Creditor / Recipient Sanctions Screening
         if (context.targetPixKey() != null && SANCTIONED_KEYS.contains(context.targetPixKey().toLowerCase())) {
             return RiskAssessmentResult.rejected(
                     getRuleName(),

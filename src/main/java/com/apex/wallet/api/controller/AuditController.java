@@ -37,12 +37,22 @@ public class AuditController {
     }
 
     @GetMapping({"/ledger-entries", "/entries"})
-    public ResponseEntity<List<LedgerEntry>> getAllLedgerEntries() {
+    public ResponseEntity<List<LedgerEntry>> getAllLedgerEntries(
+            @org.springframework.web.bind.annotation.RequestParam(name = "limit", required = false) Integer limit) {
+        if (limit != null && limit > 0) {
+            var page = ledgerAuditService.getAllEntries(org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 500)));
+            return ResponseEntity.ok(page.getContent());
+        }
         return ResponseEntity.ok(ledgerAuditService.getAllEntries());
     }
 
     @GetMapping("/all-transactions")
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
+    public ResponseEntity<List<Transaction>> getAllTransactions(
+            @org.springframework.web.bind.annotation.RequestParam(name = "limit", required = false) Integer limit) {
+        if (limit != null && limit > 0) {
+            var page = transactionRepository.findAllByOrderByCreatedAtDesc(org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 500)));
+            return ResponseEntity.ok(page.getContent());
+        }
         return ResponseEntity.ok(transactionRepository.findAllByOrderByCreatedAtDesc());
     }
 

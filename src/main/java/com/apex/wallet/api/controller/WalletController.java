@@ -104,13 +104,25 @@ public class WalletController {
     }
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<Transaction>> getMyTransactions(@AuthenticationPrincipal Account currentAccount) {
+    public ResponseEntity<List<Transaction>> getMyTransactions(
+            @AuthenticationPrincipal Account currentAccount,
+            @RequestParam(name = "limit", required = false) Integer limit) {
+        if (limit != null && limit > 0) {
+            var page = transactionRepository.findByAccountId(currentAccount.getId(), org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 100)));
+            return ResponseEntity.ok(page.getContent());
+        }
         List<Transaction> transactions = transactionRepository.findByAccountId(currentAccount.getId());
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/ledger")
-    public ResponseEntity<List<LedgerEntry>> getMyLedger(@AuthenticationPrincipal Account currentAccount) {
+    public ResponseEntity<List<LedgerEntry>> getMyLedger(
+            @AuthenticationPrincipal Account currentAccount,
+            @RequestParam(name = "limit", required = false) Integer limit) {
+        if (limit != null && limit > 0) {
+            var page = ledgerAuditService.getEntriesByAccount(currentAccount.getId(), org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 100)));
+            return ResponseEntity.ok(page.getContent());
+        }
         List<LedgerEntry> entries = ledgerAuditService.getEntriesByAccount(currentAccount.getId());
         return ResponseEntity.ok(entries);
     }
