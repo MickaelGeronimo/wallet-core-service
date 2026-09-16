@@ -70,13 +70,13 @@ public class GracefulDegradationStressTest {
     @Order(1)
     @DisplayName("Normal Mode: Database healthy -> Direct atomic execution with status COMPLETED")
     void testHealthyTransferExecution() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         BigDecimal amount = new BigDecimal("25.00");
         String key = "HEALTHY-TX-" + UUID.randomUUID();
 
-        Transaction tx = transferService.executeTransfer(key, deepak.getId(), marlon.getPixKey(), amount, "Teste Modo Saudável");
+        Transaction tx = transferService.executeTransfer(key, sender.getId(), recipient.getPixKey(), amount, "Teste Modo Saudável");
 
         Assertions.assertNotNull(tx);
         Assertions.assertEquals(TransactionStatus.COMPLETED, tx.getStatus(), "Transaction should be COMPLETED immediately");
@@ -87,8 +87,8 @@ public class GracefulDegradationStressTest {
     @Order(2)
     @DisplayName("Degraded Mode: Database outage simulated -> Graceful Degradation activates, absorbing into buffer with 202 status QUEUED_FOR_SETTLEMENT (Zero 500 errors)")
     void testGracefulDegradationUnderDatabaseOutage() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         // 1. Simulate complete database connection failure
         chaosManager.setForceFailure(true);
@@ -97,7 +97,7 @@ public class GracefulDegradationStressTest {
         BigDecimal amount = new BigDecimal("40.00");
 
         // 2. Transfer must NOT throw 500 RuntimeException; it must degrade gracefully
-        Transaction degradedTx = transferService.executeTransfer(key, deepak.getId(), marlon.getPixKey(), amount, "Teste Degradação Graciosa");
+        Transaction degradedTx = transferService.executeTransfer(key, sender.getId(), recipient.getPixKey(), amount, "Teste Degradação Graciosa");
 
         Assertions.assertNotNull(degradedTx);
         Assertions.assertEquals(TransactionStatus.QUEUED_FOR_SETTLEMENT, degradedTx.getStatus(),
@@ -110,16 +110,16 @@ public class GracefulDegradationStressTest {
     @Order(3)
     @DisplayName("Self-Healing & Eventual Consistency: Once DB recovers, QueueDrainWorker drains buffer and settles pending transactions")
     void testEventualConsistencyAndAutoHealing() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
-        BigDecimal initialMarlonBalance = marlon.getBalance();
+        BigDecimal initialRecipientBalance = recipient.getBalance();
         BigDecimal amount = new BigDecimal("50.00");
         String key = "DRAIN-TX-" + UUID.randomUUID();
 
         // 1. Force failure and enqueue transfer
         chaosManager.setForceFailure(true);
-        Transaction degradedTx = transferService.executeTransfer(key, deepak.getId(), marlon.getPixKey(), amount, "Drenagem Pendente");
+        Transaction degradedTx = transferService.executeTransfer(key, sender.getId(), recipient.getPixKey(), amount, "Drenagem Pendente");
         Assertions.assertEquals(TransactionStatus.QUEUED_FOR_SETTLEMENT, degradedTx.getStatus());
         int queuedCount = queueService.getQueueSize();
         Assertions.assertTrue(queuedCount > 0, "Queue must contain pending items");
@@ -131,36 +131,36 @@ public class GracefulDegradationStressTest {
         queueDrainWorker.drainAll();
 
         // 4. Verify buffer was cleared and destination account received funds
-        Account marlonAfter = accountRepository.findById(marlon.getId()).orElseThrow();
+        Account recipientAfter = accountRepository.findById(recipient.getId()).orElseThrow();
         Assertions.assertEquals(0, queueService.getQueueSize(), "Buffer queue must be completely drained");
-        Assertions.assertEquals(initialMarlonBalance.add(amount), marlonAfter.getBalance(),
-                "Marlon's balance must reflect the settled transfer after queue drainage");
+        Assertions.assertEquals(initialRecipientBalance.add(amount), recipientAfter.getBalance(),
+                "Recipient balance must reflect the settled transfer after queue drainage");
     }
 
     @Test
     @Order(4)
     @DisplayName("High-Speed Read: Balance cache serves lookups in < 0.2ms even when DB is offline")
     void testHighSpeedBalanceCacheLookups() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
+        Account user = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
 
         // Populate cache
-        balanceCacheService.put(deepak);
+        balanceCacheService.put(user);
 
         // Simulate DB failure
         chaosManager.setForceFailure(true);
 
         // Read from cache without touching database
-        var cached = balanceCacheService.getBalance(deepak.getId());
+        var cached = balanceCacheService.getBalance(user.getId());
         Assertions.assertTrue(cached.isPresent(), "Cached balance must be present");
-        Assertions.assertEquals(deepak.getBalance(), cached.get().balance());
-        Assertions.assertEquals(deepak.getHolderName(), cached.get().holderName());
+        Assertions.assertEquals(user.getBalance(), cached.get().balance());
+        Assertions.assertEquals(user.getHolderName(), cached.get().holderName());
     }
 
     @Test
     @Order(5)
     @DisplayName("Concurrency Spike: 20 simultaneous threads during DB outage are 100% absorbed into buffer without dropped requests")
     void testExtremeConcurrencySpikeWithGracefulDegradation() throws InterruptedException {
-        Account recipient = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         // Create 10 distinct sender accounts to simulate distributed real-world customers
         List<Account> senders = new ArrayList<>();

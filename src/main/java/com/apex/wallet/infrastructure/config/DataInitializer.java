@@ -46,9 +46,9 @@ public class DataInitializer implements CommandLineRunner {
         if (accountRepository.count() == 0) {
             log.info("Inicializando personas e contas demo com Ledger Contábil...");
 
-            seedAccount("ACC-1001", "Deepak Kumar", "deepak@microsoft.com", "password123", "deepak@pix.com", new BigDecimal("5000.00"), "ROLE_USER");
-            seedAccount("ACC-1002", "Marlon Bernardes", "marlon@microsoft.com", "password123", "marlon@pix.com", new BigDecimal("3500.00"), "ROLE_USER");
-            seedAccount("ACC-1003", "Du Bin", "dubin@microsoft.com", "password123", "dubin@pix.com", new BigDecimal("10000.00"), "ROLE_USER");
+            seedAccount("ACC-1001", "Lucas Silva", "lucas@wallet.local", "password123", "lucas@pix.com", new BigDecimal("5000.00"), "ROLE_USER");
+            seedAccount("ACC-1002", "Beatriz Santos", "beatriz@wallet.local", "password123", "beatriz@pix.com", new BigDecimal("3500.00"), "ROLE_USER");
+            seedAccount("ACC-1003", "Carlos Eduardo", "carlos@wallet.local", "password123", "carlos@pix.com", new BigDecimal("10000.00"), "ROLE_USER");
             seedAccount("ACC-9999", "Admin Contábil", "admin@wallet.local", "admin123", "admin@pix.com", new BigDecimal("50000.00"), "ROLE_ADMIN");
 
             log.info("Personas criadas com sucesso no Ledger!");

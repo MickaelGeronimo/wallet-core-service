@@ -69,35 +69,35 @@ class ApexWalletApplicationTests {
     @Test
     @DisplayName("Idempotency: Re-submitting the exact same transaction key must return original transaction without deducting twice")
     void testIdempotencyProtection() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
-        BigDecimal initialBalance = deepak.getBalance();
+        BigDecimal initialBalance = sender.getBalance();
         String idempotencyKey = "TEST-IDEMPOTENCY-" + UUID.randomUUID();
         BigDecimal transferAmount = new BigDecimal("100.00");
 
         // First attempt
-        Transaction tx1 = transferService.executeTransfer(idempotencyKey, deepak.getId(), marlon.getPixKey(), transferAmount, "Teste Idempotencia 1");
+        Transaction tx1 = transferService.executeTransfer(idempotencyKey, sender.getId(), recipient.getPixKey(), transferAmount, "Teste Idempotencia 1");
         Assertions.assertNotNull(tx1.getId());
 
         // Second attempt with exact same key
-        Transaction tx2 = transferService.executeTransfer(idempotencyKey, deepak.getId(), marlon.getPixKey(), transferAmount, "Teste Idempotencia 2 (Retry)");
+        Transaction tx2 = transferService.executeTransfer(idempotencyKey, sender.getId(), recipient.getPixKey(), transferAmount, "Teste Idempotencia 2 (Retry)");
         Assertions.assertEquals(tx1.getId(), tx2.getId(), "Must return identical transaction ID");
 
         // Verify balance was deducted ONLY ONCE
-        Account deepakAfter = accountRepository.findById(deepak.getId()).orElseThrow();
-        Assertions.assertEquals(initialBalance.subtract(transferAmount), deepakAfter.getBalance(), "Balance must be deducted only once despite duplicate request");
+        Account senderAfter = accountRepository.findById(sender.getId()).orElseThrow();
+        Assertions.assertEquals(initialBalance.subtract(transferAmount), senderAfter.getBalance(), "Balance must be deducted only once despite duplicate request");
     }
 
     @Test
     @DisplayName("Concurrency: Simultaneous parallel transfers must NEVER cause double-spending or negative balance")
     void testConcurrentTransfersNoDoubleSpending() throws InterruptedException {
-        Account duBin = accountRepository.findByEmail("dubin@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("carlos@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         int threadCount = 5;
         BigDecimal transferAmount = new BigDecimal("100.00");
-        BigDecimal initialBalance = duBin.getBalance();
+        BigDecimal initialBalance = sender.getBalance();
 
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(1);
@@ -108,7 +108,7 @@ class ApexWalletApplicationTests {
                 try {
                     latch.await();
                     String key = "CONC-TEST-" + UUID.randomUUID();
-                    transferService.executeTransfer(key, duBin.getId(), marlon.getPixKey(), transferAmount, "Concorrência Paralela");
+                    transferService.executeTransfer(key, sender.getId(), recipient.getPixKey(), transferAmount, "Concorrência Paralela");
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     // Ignored or expected if balance was drained
@@ -125,21 +125,21 @@ class ApexWalletApplicationTests {
         // We drain the queue to ensure all transactions achieve eventual consistency.
         queueDrainWorker.drainAll();
 
-        Account duBinAfter = accountRepository.findById(duBin.getId()).orElseThrow();
+        Account senderAfter = accountRepository.findById(sender.getId()).orElseThrow();
         BigDecimal expectedDeduction = transferAmount.multiply(new BigDecimal(threadCount));
-        Assertions.assertEquals(initialBalance.subtract(expectedDeduction), duBinAfter.getBalance(), "Balance must perfectly reflect all executed transactions with zero race conditions");
+        Assertions.assertEquals(initialBalance.subtract(expectedDeduction), senderAfter.getBalance(), "Balance must perfectly reflect all executed transactions with zero race conditions");
     }
 
     @Test
     @DisplayName("Antifraud: Sanctioned recipient keys must be blocked immediately by the Risk Screening Chain")
     void testAntifraudSanctionsBlock() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
 
         RiskRejectedException ex = Assertions.assertThrows(
                 RiskRejectedException.class,
                 () -> transferService.executeTransfer(
                         "SANCTION-KEY-" + UUID.randomUUID(),
-                        deepak.getId(),
+                        sender.getId(),
                         "blocked@fraud.com",
                         new BigDecimal("150.00"),
                         "Transferência para conta sancionada"
@@ -153,14 +153,14 @@ class ApexWalletApplicationTests {
     @DisplayName("Antifraud: High value instant transfer exceeding R$ 100.000 must be rejected by regulatory threshold")
     void testAntifraudHighValueThreshold() {
         Account admin = accountRepository.findByEmail("admin@wallet.local").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         RiskRejectedException ex = Assertions.assertThrows(
                 RiskRejectedException.class,
                 () -> transferService.executeTransfer(
                         "HIGH-VAL-" + UUID.randomUUID(),
                         admin.getId(),
-                        marlon.getPixKey(),
+                        recipient.getPixKey(),
                         new BigDecimal("150000.00"),
                         "Transferência acima do limite"
                 )
@@ -172,11 +172,11 @@ class ApexWalletApplicationTests {
     @Test
     @DisplayName("Transactional Outbox: A successful transaction must automatically register an Outbox Event for async message dispatch")
     void testTransactionalOutboxEventCreated() {
-        Account deepak = accountRepository.findByEmail("deepak@microsoft.com").orElseThrow();
-        Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
 
         String key = "OUTBOX-TEST-" + UUID.randomUUID();
-        Transaction tx = transferService.executeTransfer(key, deepak.getId(), marlon.getPixKey(), new BigDecimal("50.00"), "Teste Outbox Event");
+        Transaction tx = transferService.executeTransfer(key, sender.getId(), recipient.getPixKey(), new BigDecimal("50.00"), "Teste Outbox Event");
 
         List<OutboxEvent> events = outboxEventRepository.findAll();
         boolean hasMatchingEvent = events.stream()

@@ -30,31 +30,31 @@ public class AuthController {
     public ResponseEntity<List<Map<String, String>>> getDemoPersonas() {
         List<Map<String, String>> personas = Arrays.asList(
             Map.of(
-                "name", "Deepak Kumar",
-                "role", "Senior Software Engineer @ Microsoft",
-                "email", "deepak@microsoft.com",
+                "name", "Lucas Silva",
+                "role", "Correntista Individual",
+                "email", "lucas@wallet.local",
                 "password", "password123",
-                "pixKey", "deepak@pix.com",
+                "pixKey", "lucas@pix.com",
                 "initialBalance", "R$ 5.000,00",
-                "badge", "Engenheiro Sênior"
+                "badge", "Usuário Demo 1"
             ),
             Map.of(
-                "name", "Marlon Bernardes",
-                "role", "Software Engineer @ Microsoft (Dublin)",
-                "email", "marlon@microsoft.com",
+                "name", "Beatriz Santos",
+                "role", "Correntista Individual",
+                "email", "beatriz@wallet.local",
                 "password", "password123",
-                "pixKey", "marlon@pix.com",
+                "pixKey", "beatriz@pix.com",
                 "initialBalance", "R$ 3.500,00",
-                "badge", "Tech Lead"
+                "badge", "Usuário Demo 2"
             ),
             Map.of(
-                "name", "Du Bin",
-                "role", "Principal Software Engineer @ Microsoft",
-                "email", "dubin@microsoft.com",
+                "name", "Carlos Eduardo",
+                "role", "Pessoa Jurídica / Lojista",
+                "email", "carlos@wallet.local",
                 "password", "password123",
-                "pixKey", "dubin@pix.com",
+                "pixKey", "carlos@pix.com",
                 "initialBalance", "R$ 10.000,00",
-                "badge", "Principal Architect"
+                "badge", "Usuário Demo 3"
             ),
             Map.of(
                 "name", "Admin Contábil",
