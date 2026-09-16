@@ -59,7 +59,7 @@ public class AuthController {
             Map.of(
                 "name", "Admin Contábil",
                 "role", "Auditoria Geral & Compliance",
-                "email", "admin@apex.com",
+                "email", "admin@wallet.local",
                 "password", "admin123",
                 "pixKey", "admin@pix.com",
                 "initialBalance", "R$ 50.000,00",

@@ -168,7 +168,7 @@ public class GracefulDegradationStressTest {
             String suffix = UUID.randomUUID().toString().substring(0, 8);
             Account acc = new Account("SPIKE-" + suffix,
                     "Spike User " + i,
-                    "spike" + suffix + "@apex.com",
+                    "spike" + suffix + "@wallet.local",
                     "secret",
                     "spike" + suffix + "@pix.com",
                     new BigDecimal("1000.00"),

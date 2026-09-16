@@ -18,6 +18,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(com.apex.wallet.domain.risk.RiskRejectedException.class)
+    public ResponseEntity<Map<String, Object>> handleRiskRejected(com.apex.wallet.domain.risk.RiskRejectedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        body.put("error", "Transação Rejeitada pelo Motor Antifraude/AML");
+        body.put("rule", ex.getRiskResult().ruleName());
+        body.put("reason", ex.getRiskResult().reason());
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
         return buildErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());

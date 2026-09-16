@@ -1,5 +1,5 @@
 # =========================================================================
-# NEXA Platform - Root .gitignore
+# Digital Wallet Engine (wallet-core-service) - .gitignore
 # =========================================================================
 
 # Java & Maven
@@ -11,20 +11,8 @@
 **/*.nar
 .mvn/wrapper/maven-wrapper.jar
 
-# Node & Next.js
-**/node_modules/
-**/.next/
-**/out/
-**/build/
-**/dist/
-.env*.local
-
 # Logs
 **/*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
 # IDE & Editors
 .idea/

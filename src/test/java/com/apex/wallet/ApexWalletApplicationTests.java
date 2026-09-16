@@ -152,7 +152,7 @@ class ApexWalletApplicationTests {
     @Test
     @DisplayName("Antifraud: High value instant transfer exceeding R$ 100.000 must be rejected by regulatory threshold")
     void testAntifraudHighValueThreshold() {
-        Account admin = accountRepository.findByEmail("admin@apex.com").orElseThrow();
+        Account admin = accountRepository.findByEmail("admin@wallet.local").orElseThrow();
         Account marlon = accountRepository.findByEmail("marlon@microsoft.com").orElseThrow();
 
         RiskRejectedException ex = Assertions.assertThrows(
@@ -183,5 +183,23 @@ class ApexWalletApplicationTests {
                 .anyMatch(e -> e.getAggregateId().equals(tx.getId().toString()) && e.getEventType().equals("PAYMENT_SETTLED"));
 
         Assertions.assertTrue(hasMatchingEvent, "Must find OutboxEvent corresponding to the executed transfer transaction");
+    }
+
+    @Test
+    @DisplayName("Exception Handling: RiskRejectedException must be translated to HTTP 422 Unprocessable Entity with structured payload")
+    void testRiskRejectedExceptionHandler() {
+        var handler = new com.apex.wallet.api.exception.GlobalExceptionHandler();
+        var riskResult = com.apex.wallet.domain.risk.RiskAssessmentResult.rejected(
+                "SANCTIONS_AND_BLACKLIST_RULE",
+                "Chave destinatária consta na lista restritiva",
+                1.0
+        );
+        var ex = new RiskRejectedException(riskResult);
+        var response = handler.handleRiskRejected(ex);
+
+        Assertions.assertEquals(org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals("SANCTIONS_AND_BLACKLIST_RULE", response.getBody().get("rule"));
+        Assertions.assertEquals("Chave destinatária consta na lista restritiva", response.getBody().get("reason"));
     }
 }
