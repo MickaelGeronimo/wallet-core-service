@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "outbox_events", indexes = {
-        @Index(name = "idx_outbox_status_created", columnList = "status, createdAt")
+        @Index(name = "idx_outbox_status_created", columnList = "status, created_at")
 })
 public class OutboxEvent {
 
@@ -14,13 +14,13 @@ public class OutboxEvent {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 64)
+    @Column(name = "aggregate_type", nullable = false, length = 64)
     private String aggregateType;
 
-    @Column(nullable = false, length = 64)
+    @Column(name = "aggregate_id", nullable = false, length = 64)
     private String aggregateId;
 
-    @Column(nullable = false, length = 64)
+    @Column(name = "event_type", nullable = false, length = 64)
     private String eventType;
 
     @Lob
@@ -31,14 +31,16 @@ public class OutboxEvent {
     @Column(nullable = false, length = 20)
     private OutboxStatus status = OutboxStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column(name = "retry_count", nullable = false)
     private int retryCount = 0;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "processed_at")
     private Instant processedAt;
 
+    @Column(name = "last_error", length = 1000)
     private String lastError;
 
     public OutboxEvent() {}

@@ -43,11 +43,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             final String userEmail = jwtService.extractEmail(jwt);
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                Optional<Account> accountOpt = accountRepository.findByEmail(userEmail);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtService.isTokenValid(jwt, userEmail)) {
+                Account account = null;
+                try {
+                    account = accountRepository.findByEmail(userEmail).orElse(null);
+                } catch (Exception dbEx) {
+                    // Under database outage / degraded mode:
+                    // Reconstruct authenticated principal directly from cryptographically verified JWT claims
+                    Long accountId = jwtService.extractAccountId(jwt);
+                    String holderName = jwtService.extractClaim(jwt, c -> (String) c.get("holderName"));
+                    String role = jwtService.extractClaim(jwt, c -> (String) c.get("role"));
+                    if (accountId != null && role != null) {
+                        account = new Account();
+                        account.setId(accountId);
+                        account.setEmail(userEmail);
+                        account.setHolderName(holderName != null ? holderName : "Usuario");
+                        account.setRole(role);
+                    }
+                }
 
-                if (accountOpt.isPresent() && jwtService.isTokenValid(jwt, userEmail)) {
-                    Account account = accountOpt.get();
+                if (account != null) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             account,
                             null,

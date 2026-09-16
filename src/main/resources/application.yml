@@ -6,10 +6,10 @@ spring:
     name: wallet-core-service
 
   datasource:
-    url: jdbc:h2:mem:apexwallet;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ""
+    url: "${SPRING_DATASOURCE_URL:jdbc:h2:mem:apexwallet;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL}"
+    driverClassName: "${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}"
+    username: "${SPRING_DATASOURCE_USERNAME:sa}"
+    password: "${SPRING_DATASOURCE_PASSWORD:}"
 
   h2:
     console:
@@ -21,7 +21,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: "${SPRING_JPA_HIBERNATE_DDL_AUTO:create-drop}"
     show-sql: false
     properties:
       hibernate:
@@ -29,8 +29,8 @@ spring:
 
 app:
   jwt:
-    secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
-    expiration-ms: 86400000 # 24 hours
+    secret: "${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}"
+    expiration-ms: "${JWT_EXPIRATION_MS:86400000}"
 
 resilience4j:
   circuitbreaker:

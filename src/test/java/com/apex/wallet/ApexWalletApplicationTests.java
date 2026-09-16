@@ -43,6 +43,9 @@ class ApexWalletApplicationTests {
     @Autowired(required = false)
     private io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry circuitBreakerRegistry;
 
+    @Autowired(required = false)
+    private io.swagger.v3.oas.models.OpenAPI openAPI;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         chaosManager.reset();
@@ -64,6 +67,15 @@ class ApexWalletApplicationTests {
     @Test
     void contextLoads() {
         Assertions.assertTrue(accountRepository.count() > 0, "Personas should be initialized in database");
+    }
+
+    @Test
+    @DisplayName("OpenAPI / Swagger: OpenApi specification must configure interactive Bearer JWT Authorization")
+    void testOpenApiConfiguration() {
+        Assertions.assertNotNull(openAPI, "OpenAPI bean must be present in Spring Context");
+        Assertions.assertNotNull(openAPI.getInfo());
+        Assertions.assertEquals("1.0.0", openAPI.getInfo().getVersion());
+        Assertions.assertTrue(openAPI.getComponents().getSecuritySchemes().containsKey("BearerAuth"));
     }
 
     @Test
