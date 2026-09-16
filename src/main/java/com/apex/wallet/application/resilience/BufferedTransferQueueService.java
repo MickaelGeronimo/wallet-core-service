@@ -63,6 +63,30 @@ public class BufferedTransferQueueService {
         return deadLetterQueue.size();
     }
 
+    public List<QueuedTransferItem> getDeadLetterItems() {
+        return new ArrayList<>(deadLetterQueue);
+    }
+
+    public int replayDeadLetterQueue() {
+        int count = 0;
+        QueuedTransferItem item;
+        while ((item = deadLetterQueue.poll()) != null) {
+            // Re-enqueue with reset retry count to give it another processing chance
+            bufferQueue.offer(new QueuedTransferItem(
+                    item.idempotencyKey(),
+                    item.sourceAccountId(),
+                    item.targetPixKey(),
+                    item.amount(),
+                    item.description(),
+                    Instant.now(),
+                    0
+            ));
+            count++;
+        }
+        log.info("DLQ REPLAY: {} itens re-enfileirados da DLQ para a fila principal de contingência.", count);
+        return count;
+    }
+
     public void clear() {
         bufferQueue.clear();
         deadLetterQueue.clear();

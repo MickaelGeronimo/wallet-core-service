@@ -58,6 +58,9 @@ class ApexWalletApplicationTests {
     @Autowired
     private com.apex.wallet.api.controller.AuditController auditController;
 
+    @Autowired
+    private com.apex.wallet.api.controller.ChaosSimulationController chaosController;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
         chaosManager.reset();
@@ -394,5 +397,54 @@ class ApexWalletApplicationTests {
         var pagedLedger = ledgerAuditService.getEntriesByAccount(sender.getId(), org.springframework.data.domain.PageRequest.of(0, 2));
         Assertions.assertNotNull(pagedLedger);
         Assertions.assertTrue(pagedLedger.getNumberOfElements() <= 2);
+    }
+
+    @Test
+    @DisplayName("Exception Handling & RFC Compliance: Malformed JSON and unsupported HTTP methods must return 400 and 405 (Zero 500s)")
+    void testMalformedJsonAndMethodNotAllowedHandlers() {
+        var handler = new com.apex.wallet.api.exception.GlobalExceptionHandler();
+
+        // 1. Malformed JSON payload
+        var unreadableEx = new org.springframework.http.converter.HttpMessageNotReadableException("Required request body is missing");
+        var res400 = handler.handleMessageNotReadable(unreadableEx);
+        Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res400.getStatusCode());
+        Assertions.assertEquals(400, res400.getBody().get("status"));
+        Assertions.assertTrue(res400.getBody().get("message").toString().contains("malformado"));
+
+        // 2. Unsupported HTTP method
+        var methodEx = new org.springframework.web.HttpRequestMethodNotSupportedException("DELETE");
+        var res405 = handler.handleMethodNotSupported(methodEx);
+        Assertions.assertEquals(org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED, res405.getStatusCode());
+        Assertions.assertEquals(405, res405.getBody().get("status"));
+        Assertions.assertTrue(res405.getBody().get("message").toString().contains("DELETE"));
+    }
+
+    @Test
+    @DisplayName("Resilience & FinOps: Dead Letter Queue (DLQ) introspection and replay lifecycle")
+    void testDeadLetterQueueReplayLifecycle() {
+        // Enqueue an item directly to DLQ
+        var deadItem = new com.apex.wallet.application.resilience.QueuedTransferItem(
+                "DLQ-TEST-" + UUID.randomUUID(),
+                1L,
+                "beatriz@pix.com",
+                new BigDecimal("10.00"),
+                "Teste DLQ",
+                java.time.Instant.now(),
+                3
+        );
+        queueService.routeToDeadLetter(deadItem);
+
+        Assertions.assertTrue(queueService.getDeadLetterQueueSize() >= 1, "DLQ must hold the routed item");
+
+        // Inspect via controller
+        var itemsRes = chaosController.getDeadLetterItems();
+        Assertions.assertEquals(org.springframework.http.HttpStatus.OK, itemsRes.getStatusCode());
+        Assertions.assertFalse(itemsRes.getBody().isEmpty(), "Controller must return DLQ items");
+
+        // Replay DLQ
+        var replayRes = chaosController.replayDeadLetter();
+        Assertions.assertEquals(org.springframework.http.HttpStatus.OK, replayRes.getStatusCode());
+        Assertions.assertEquals(0, queueService.getDeadLetterQueueSize(), "DLQ must be empty after replay");
+        Assertions.assertTrue(queueService.hasPending(), "Buffer queue must receive the replayed item");
     }
 }

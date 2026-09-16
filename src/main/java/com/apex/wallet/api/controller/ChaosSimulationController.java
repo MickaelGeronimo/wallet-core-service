@@ -118,4 +118,21 @@ public class ChaosSimulationController {
         response.put("message", "Dreno de fila assíncrona executado com sucesso.");
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/dead-letter-items")
+    public ResponseEntity<java.util.List<com.apex.wallet.application.resilience.QueuedTransferItem>> getDeadLetterItems() {
+        return ResponseEntity.ok(queueService.getDeadLetterItems());
+    }
+
+    @PostMapping("/replay-dead-letter")
+    public ResponseEntity<Map<String, Object>> replayDeadLetter() {
+        int replayed = queueService.replayDeadLetterQueue();
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("action", "REPLAY_DEAD_LETTER_QUEUE");
+        response.put("replayedCount", replayed);
+        response.put("bufferQueuePendingCount", queueService.getQueueSize());
+        response.put("deadLetterQueueCount", queueService.getDeadLetterQueueSize());
+        response.put("message", "Itens da Dead Letter Queue reenviados com sucesso para a fila de contingência.");
+        return ResponseEntity.ok(response);
+    }
 }
