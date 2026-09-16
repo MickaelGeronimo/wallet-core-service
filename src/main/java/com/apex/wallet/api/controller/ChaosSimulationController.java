@@ -97,6 +97,7 @@ public class ChaosSimulationController {
         status.put("forceDatabaseFailure", forceFail);
         status.put("artificialDatabaseDelayMs", delay);
         status.put("bufferQueuePendingCount", queueSize);
+        status.put("deadLetterQueueCount", queueService.getDeadLetterQueueSize());
         status.put("balanceCacheEntriesCount", cachedCount);
         status.put("circuitBreakerState", circuitState);
         status.put("systemResilience", "Graceful Degradation (Queue Buffering + In-Memory Fast Cache)");

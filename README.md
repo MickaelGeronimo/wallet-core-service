@@ -4,7 +4,7 @@
 
 [![Java 17](https://img.shields.io/badge/Java-17%20LTS-orange.svg)](https://openjdk.org/)
 [![Spring Boot 3.3.4](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Build Status](https://img.shields.io/badge/Tests-14%2F14%20Passing%20(100%25)-success.svg)]()
+[![Build Status](https://img.shields.io/badge/Tests-15%2F15%20Passing%20(100%25)-success.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-PostgreSQL%20%7C%20Redis%20%7C%20Kafka-2496ED.svg)](docker-compose.yml)
 
@@ -175,12 +175,12 @@ O projeto vem com endpoints dedicados para você simular falhas em tempo de exec
 mvn clean test
 ```
 
-A suíte cobre 14 cenários de estresse, concorrência, integridade, especificações e injeção de falhas:
+A suíte cobre 15 cenários de estresse, concorrência, integridade, especificações e injeção de falhas:
 ```text
-[INFO] Tests run: 9, Failures: 0, Errors: 0 -- in ApexWalletApplicationTests
+[INFO] Tests run: 10, Failures: 0, Errors: 0 -- in ApexWalletApplicationTests
 [INFO] Tests run: 5, Failures: 0, Errors: 0 -- in GracefulDegradationStressTest
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS (14/14 testes passando)
+[INFO] BUILD SUCCESS (15/15 testes passando)
 [INFO] ------------------------------------------------------------------------
 ```
 

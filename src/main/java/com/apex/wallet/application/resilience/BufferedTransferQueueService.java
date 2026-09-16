@@ -52,7 +52,19 @@ public class BufferedTransferQueueService {
         return !bufferQueue.isEmpty();
     }
 
+    private final Queue<QueuedTransferItem> deadLetterQueue = new ConcurrentLinkedQueue<>();
+
+    public void routeToDeadLetter(QueuedTransferItem item) {
+        deadLetterQueue.offer(item);
+        log.error("DLQ ATIVADA: Transferência {} encaminhada para a Dead Letter Queue após esgotar tentativas.", item.idempotencyKey());
+    }
+
+    public int getDeadLetterQueueSize() {
+        return deadLetterQueue.size();
+    }
+
     public void clear() {
         bufferQueue.clear();
+        deadLetterQueue.clear();
     }
 }

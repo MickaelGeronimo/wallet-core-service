@@ -63,7 +63,7 @@ public class QueueDrainWorker {
                 if (item.retryCount() < 3) {
                     queueService.enqueue(item.withIncrementedRetry());
                 } else {
-                    log.error("QueueDrainWorker: Item {} descartado para DLQ após 3 tentativas.", item.idempotencyKey());
+                    queueService.routeToDeadLetter(item);
                 }
             }
         }

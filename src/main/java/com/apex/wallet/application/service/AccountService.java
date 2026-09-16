@@ -31,7 +31,10 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Optional<Account> lookupPixKey(String pixKey) {
-        return accountRepository.findByPixKey(pixKey);
+        if (pixKey == null || pixKey.isBlank()) {
+            return Optional.empty();
+        }
+        return accountRepository.findByPixKeyIgnoreCase(pixKey.trim());
     }
 
     @Transactional(readOnly = true)

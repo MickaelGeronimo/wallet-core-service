@@ -15,7 +15,11 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
 
+    Optional<Account> findByEmailIgnoreCase(String email);
+
     Optional<Account> findByPixKey(String pixKey);
+
+    Optional<Account> findByPixKeyIgnoreCase(String pixKey);
 
     Optional<Account> findByAccountNumber(String accountNumber);
 

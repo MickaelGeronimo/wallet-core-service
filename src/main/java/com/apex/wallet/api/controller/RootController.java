@@ -28,6 +28,7 @@ public class RootController {
         publicEndpoints.put("GET /api/audit/balance", "Auditoria de integridade matemática em tempo real");
         publicEndpoints.put("GET /api/audit/entries", "Extrato global imutável das partidas dobradas");
         publicEndpoints.put("GET /api/wallet/pix-lookup?key={chave}", "Consulta de chave PIX");
+        publicEndpoints.put("GET /api/chaos/status", "Telemetria do Circuit Breaker, contingência e DLQ");
         resp.put("publicEndpoints", publicEndpoints);
 
         return ResponseEntity.ok(resp);

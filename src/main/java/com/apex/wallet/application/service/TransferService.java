@@ -101,13 +101,15 @@ public class TransferService {
         Account sourceAccountMeta = accountRepository.findById(sourceAccountId)
                 .orElseThrow(() -> new IllegalArgumentException("Conta de origem não encontrada: " + sourceAccountId));
 
+        String normalizedPixKey = targetPixKey != null ? targetPixKey.trim() : "";
+
         long recentTxCount = transactionRepository.countBySourceAccountIdAndCreatedAtAfter(
                 sourceAccountId, LocalDateTime.now().minus(60, ChronoUnit.SECONDS)
         );
 
         RiskContext riskContext = new RiskContext(
                 sourceAccountMeta,
-                targetPixKey,
+                normalizedPixKey,
                 amount,
                 "127.0.0.1",
                 recentTxCount,
@@ -115,8 +117,8 @@ public class TransferService {
         );
         riskAssessmentService.assessTransaction(riskContext);
 
-        // 3. Resolve target account by Pix key
-        Account targetAccountMeta = accountRepository.findByPixKey(targetPixKey)
+        // 3. Resolve target account by Pix key (case-insensitive & trimmed)
+        Account targetAccountMeta = accountRepository.findByPixKeyIgnoreCase(normalizedPixKey)
                 .orElseThrow(() -> new IllegalArgumentException("Chave PIX destinatária não encontrada: " + targetPixKey));
 
         Long targetAccountId = targetAccountMeta.getId();

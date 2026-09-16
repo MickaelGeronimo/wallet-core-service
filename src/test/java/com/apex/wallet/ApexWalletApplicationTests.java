@@ -227,4 +227,20 @@ class ApexWalletApplicationTests {
         Assertions.assertEquals(409, response.getBody().get("status"));
         Assertions.assertTrue(response.getBody().get("message").toString().contains("chave de idempotência duplicada"));
     }
+
+    @Test
+    @DisplayName("PIX Resolution: Pix keys with whitespace and uppercase letters must resolve deterministically")
+    void testPixKeyCaseInsensitiveAndTrimmingTransfer() {
+        Account sender = accountRepository.findByEmail("lucas@wallet.local").orElseThrow();
+        Account recipient = accountRepository.findByEmail("beatriz@wallet.local").orElseThrow();
+
+        // Target pix key formatted with uppercase and surrounding whitespace
+        String messyPixKey = "  BEATRIZ@PIX.COM  ";
+        String key = "PIX-CASE-" + UUID.randomUUID();
+
+        Transaction tx = transferService.executeTransfer(key, sender.getId(), messyPixKey, new BigDecimal("15.00"), "Teste Case Insensitive");
+
+        Assertions.assertNotNull(tx);
+        Assertions.assertEquals(recipient.getId(), tx.getTargetAccountId(), "Must correctly resolve target account ID despite uppercase/whitespace Pix key");
+    }
 }

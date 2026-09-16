@@ -62,7 +62,11 @@ public class OutboxEvent {
 
     public void markFailed(String error) {
         this.retryCount++;
-        this.lastError = error;
+        if (error != null && error.length() > 950) {
+            this.lastError = error.substring(0, 950) + "... [truncated]";
+        } else {
+            this.lastError = error;
+        }
         if (this.retryCount >= 3) {
             this.status = OutboxStatus.DEAD_LETTER;
         } else {
