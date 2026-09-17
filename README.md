@@ -4,7 +4,8 @@
 
 [![Java 17](https://img.shields.io/badge/Java-17%20LTS-orange.svg)](https://openjdk.org/)
 [![Spring Boot 3.3.4](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Build Status](https://img.shields.io/badge/Tests-27%2F27%20Passing%20(100%25)-success.svg)]()
+[![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200.svg)](src/main/resources/db/migration)
+[![Build Status](https://img.shields.io/badge/Tests-28%2F28%20Passing%20(100%25)-success.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-PostgreSQL%2016-2496ED.svg)](docker-compose.yml)
 

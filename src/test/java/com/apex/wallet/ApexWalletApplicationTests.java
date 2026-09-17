@@ -498,4 +498,18 @@ class ApexWalletApplicationTests {
         Assertions.assertEquals(pixKey, jwtService.extractPixKey(token));
         Assertions.assertTrue(jwtService.isTokenValid(token, email));
     }
+
+    @Test
+    @DisplayName("Security & Identity: JWT expiration TTL must be configured to 60 minutes (3,600,000 ms)")
+    void testJwtTokenExpirationConfiguredToSixtyMinutes() {
+        String email = "carlos@wallet.local";
+        long now = System.currentTimeMillis();
+        String token = jwtService.generateToken(email, 3L, "Carlos Eduardo", "ROLE_USER");
+        java.util.Date expiration = jwtService.extractClaim(token, io.jsonwebtoken.Claims::getExpiration);
+        Assertions.assertNotNull(expiration);
+        long diffMs = expiration.getTime() - now;
+        // 60 minutes = 3,600,000 ms; tolerance +/- 5,000 ms
+        Assertions.assertTrue(diffMs >= 3590000 && diffMs <= 3610000,
+                "Expected expiration ~3600000ms (60 min), but was " + diffMs + "ms");
+    }
 }

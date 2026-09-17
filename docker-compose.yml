@@ -46,7 +46,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/walletdb
       SPRING_DATASOURCE_USERNAME: wallet_user
       SPRING_DATASOURCE_PASSWORD: wallet_password_2026
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     depends_on:
       postgres:
         condition: service_healthy
