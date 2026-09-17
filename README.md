@@ -6,7 +6,7 @@
 [![Spring Boot 3.3.4](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Status](https://img.shields.io/badge/Tests-27%2F27%20Passing%20(100%25)-success.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-PostgreSQL%20%7C%20Redis%20%7C%20Kafka-2496ED.svg)](docker-compose.yml)
+[![Docker](https://img.shields.io/badge/Docker-PostgreSQL%2016-2496ED.svg)](docker-compose.yml)
 
 ---
 
@@ -164,7 +164,7 @@ O projeto vem com endpoints dedicados para você simular falhas em tempo de exec
 * **Tolerância a Falhas:** Resilience4j 2.2 (CircuitBreaker com fallback inteligente).
 * **Segurança:** Autenticação stateless via JWT (JJWT 0.12.6).
 * **Banco de Dados:** H2 para desenvolvimento e suíte de testes; PostgreSQL 16 para ambiente produtivo.
-* **Mensageria & Cache:** Apache Kafka (KRaft mode) e Redis 7 via Docker Compose.
+* **Resiliência e Cache:** Fila de contingência thread-safe (`ConcurrentLinkedQueue`) e cache em memória (`ConcurrentHashMap`) projetados para degradação graciosa autônoma sem dependências externas.
 
 ---
 
@@ -193,7 +193,7 @@ mvn spring-boot:run
 - Console H2: `http://localhost:8080/h2-console`
 - Healthcheck: `http://localhost:8080/actuator/health`
 
-### 3. Subir com Docker Compose (PostgreSQL, Kafka, Redis)
+### 3. Subir com Docker Compose (PostgreSQL 16 e PgAdmin)
 ```bash
 docker compose up -d
 ```
