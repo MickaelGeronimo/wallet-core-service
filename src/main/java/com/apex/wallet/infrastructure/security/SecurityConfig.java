@@ -53,6 +53,15 @@ public class SecurityConfig {
                         LocalDateTime.now()
                     ));
                 })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write(String.format(
+                        "{\"timestamp\":\"%s\",\"status\":403,\"error\":\"Forbidden\",\"message\":\"Acesso negado: este recurso exige perfil de administrador.\"}",
+                        LocalDateTime.now()
+                    ));
+                })
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
@@ -61,15 +70,22 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/api/health",
                     "/api/auth/**",
-                    "/api/audit/**",
                     "/api/wallet/pix-lookup",
                     "/h2-console/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**",
-                    "/actuator/**",
-                    "/api/chaos/**"
+                    "/actuator/health",
+                    "/actuator/health/**",
+                    "/actuator/info"
                 ).permitAll()
+                // Operational / back-office surfaces: global ledger, all customers' transactions,
+                // fault injection and full actuator metrics are restricted to administrators.
+                .requestMatchers(
+                    "/api/audit/**",
+                    "/api/chaos/**",
+                    "/actuator/**"
+                ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

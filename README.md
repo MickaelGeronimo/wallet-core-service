@@ -146,7 +146,9 @@ Nunca dispare chamadas para o Kafka ou SNS dentro da transação do banco relaci
 
 ## Controlador de Caos Embutido (Teste Você Mesmo)
 
-O projeto vem com endpoints dedicados para você simular falhas em tempo de execução e ver a degradação graciosa acontecendo na prática:
+O projeto vem com endpoints dedicados para você simular falhas em tempo de execução e ver a degradação graciosa acontecendo na prática.
+
+> **Acesso restrito:** os endpoints `/api/chaos/**`, `/api/audit/**` e `/actuator/**` (exceto `health` e `info`) exigem um token JWT de administrador (`ROLE_ADMIN`). Faça login com `admin@wallet.local` / `admin123` em `POST /api/auth/login` e envie o cabeçalho `Authorization: Bearer <token>`. Sem token a resposta é `401`; com token de usuário comum, `403`.
 
 | Ação | Endpoint | O que acontece |
 | :--- | :--- | :--- |
@@ -176,12 +178,13 @@ O projeto vem com endpoints dedicados para você simular falhas em tempo de exec
 mvn clean test
 ```
 
-A suíte cobre 27 cenários de estresse, concorrência, integridade contábil, segurança OWASP e injeção de falhas:
+A suíte cobre 34 cenários de estresse, concorrência, integridade contábil, segurança OWASP, controle de acesso e injeção de falhas:
 ```text
-[INFO] Tests run: 22, Failures: 0, Errors: 0 -- in ApexWalletApplicationTests
+[INFO] Tests run: 24, Failures: 0, Errors: 0 -- in ApexWalletApplicationTests
 [INFO] Tests run: 5, Failures: 0, Errors: 0 -- in GracefulDegradationStressTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0 -- in SecurityAccessControlTests
 [INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS (27/27 testes passando - 100%)
+[INFO] BUILD SUCCESS (34/34 testes passando - 100%)
 [INFO] ------------------------------------------------------------------------
 ```
 

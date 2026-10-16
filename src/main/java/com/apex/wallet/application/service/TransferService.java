@@ -99,8 +99,13 @@ public class TransferService {
         // 1. Idempotency Check: Return existing transaction if key already exists
         Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(effectiveKey);
         if (existingTx.isPresent()) {
+            Transaction previous = existingTx.get();
+            // The key is globally unique: never hand back a transaction that belongs to another account.
+            if (previous.getType() != TransactionType.PIX_TRANSFER || !sourceAccountId.equals(previous.getSourceAccountId())) {
+                throw new IllegalStateException("Chave de idempotência já utilizada em outra operação. Gere uma nova chave.");
+            }
             log.info("Chave de idempotência já processada: {}. Retornando transação existente.", effectiveKey);
-            return existingTx.get();
+            return previous;
         }
 
         // 2. Antifraud / AML Risk Screening Pipeline
@@ -280,7 +285,11 @@ public class TransferService {
 
         Optional<Transaction> existingTx = transactionRepository.findByIdempotencyKey(effectiveKey);
         if (existingTx.isPresent()) {
-            return existingTx.get();
+            Transaction previous = existingTx.get();
+            if (previous.getType() != TransactionType.DEPOSIT || !accountId.equals(previous.getTargetAccountId())) {
+                throw new IllegalStateException("Chave de idempotência já utilizada em outra operação. Gere uma nova chave.");
+            }
+            return previous;
         }
 
         Account account = accountRepository.findByIdWithLock(accountId)

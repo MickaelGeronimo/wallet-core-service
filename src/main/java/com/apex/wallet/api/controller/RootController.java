@@ -25,12 +25,15 @@ public class RootController {
         Map<String, String> publicEndpoints = new LinkedHashMap<>();
         publicEndpoints.put("POST /api/auth/login", "Autenticação via e-mail ou conta demo");
         publicEndpoints.put("GET /api/auth/personas", "Contas de teste pré-carregadas");
-        publicEndpoints.put("GET /api/audit/summary", "Reconciliação contábil matemática (Equação do Livro-Razão)");
-        publicEndpoints.put("GET /api/audit/entries", "Extrato global imutável das partidas dobradas");
-        publicEndpoints.put("GET /api/audit/outbox", "Observabilidade de eventos assíncronos do Transactional Outbox");
         publicEndpoints.put("GET /api/wallet/pix-lookup?key={chave}", "Consulta de chave PIX");
-        publicEndpoints.put("GET /api/chaos/status", "Telemetria do Circuit Breaker, contingência e DLQ");
         resp.put("publicEndpoints", publicEndpoints);
+
+        Map<String, String> adminEndpoints = new LinkedHashMap<>();
+        adminEndpoints.put("GET /api/audit/summary", "Reconciliação contábil matemática (Equação do Livro-Razão)");
+        adminEndpoints.put("GET /api/audit/entries", "Extrato global imutável das partidas dobradas");
+        adminEndpoints.put("GET /api/audit/outbox", "Observabilidade de eventos assíncronos do Transactional Outbox");
+        adminEndpoints.put("GET /api/chaos/status", "Telemetria do Circuit Breaker, contingência e DLQ");
+        resp.put("adminEndpoints (Bearer token ROLE_ADMIN)", adminEndpoints);
 
         return ResponseEntity.ok(resp);
     }
