@@ -40,6 +40,12 @@ class SecurityAccessControlTests {
     @Autowired
     private TransferService transferService;
 
+    @Autowired
+    private com.apex.wallet.infrastructure.repository.TransactionRepository transactionRepository;
+
+    @Autowired
+    private com.apex.wallet.infrastructure.repository.LedgerEntryRepository ledgerEntryRepository;
+
     private String bearerFor(String email) {
         Account acc = accountRepository.findByEmail(email).orElseThrow();
         return "Bearer " + jwtService.generateToken(acc.getEmail(), acc.getId(), acc.getHolderName(), acc.getRole(), acc.getPixKey());
@@ -118,7 +124,7 @@ class SecurityAccessControlTests {
 
     private Account newAccount(String label) {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
-        return accountRepository.save(new Account(
+        return TestLedgerSupport.saveFundedAccount(accountRepository, transactionRepository, ledgerEntryRepository, new Account(
                 "IDEM-" + suffix,
                 label + " " + suffix,
                 "idem" + suffix + "@wallet.local",

@@ -520,7 +520,7 @@ class ApexWalletApplicationTests {
         OutboxEvent event = new OutboxEvent("Account", "1", "ACCOUNT_CREATED", "{\"accountId\":1}");
         outboxEventRepository.save(event);
 
-        List<OutboxEvent> pending = outboxEventRepository.findPendingForDispatch(org.springframework.data.domain.PageRequest.of(0, 10));
+        List<OutboxEvent> pending = outboxEventRepository.findPendingForDispatch(org.springframework.data.domain.PageRequest.of(0, 100_000));
         Assertions.assertNotNull(pending);
         Assertions.assertFalse(pending.isEmpty(), "Pending outbox events must be retrieved with pessimistic lock");
         Assertions.assertTrue(pending.stream().anyMatch(e -> event.getId().equals(e.getId())),
