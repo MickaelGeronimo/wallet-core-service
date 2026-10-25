@@ -48,6 +48,12 @@ public class GracefulDegradationStressTest {
     @Autowired(required = false)
     private io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry circuitBreakerRegistry;
 
+    @Autowired
+    private com.apex.wallet.infrastructure.repository.TransactionRepository transactionRepository;
+
+    @Autowired
+    private com.apex.wallet.infrastructure.repository.LedgerEntryRepository ledgerEntryRepository;
+
     @BeforeEach
     void setUp() {
         chaosManager.reset();
@@ -173,7 +179,7 @@ public class GracefulDegradationStressTest {
                     "spike" + suffix + "@pix.com",
                     new BigDecimal("1000.00"),
                     "ROLE_USER");
-            senders.add(accountRepository.save(acc));
+            senders.add(TestLedgerSupport.saveFundedAccount(accountRepository, transactionRepository, ledgerEntryRepository, acc));
         }
 
         int threads = 20;
